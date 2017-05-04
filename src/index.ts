@@ -1,7 +1,4 @@
-import * as Knex from 'knex';
-import {Result} from "./Result";
-import {ResultsMap} from './ResultMap';
-
+import * as Knex from "knex";
 
 
 const client = Knex({
@@ -19,78 +16,9 @@ const client = Knex({
     }
 });
 
-class User {
 
-    private id: number;
+client.from('users').limit(1).then(data => {
+    console.log(Array.isArray(data));
+    console.log(data);
+});
 
-    private avatar: string;
-
-}
-
-class Like {
-
-    private id: number;
-
-    private likeableType: string;
-
-}
-
-class Gallery {
-
-    private userId: number;
-
-    private creator: User;
-
-    private likes: Like[];
-}
-
-const UserResult: Result = {
-    type: User
-};
-
-const LikeResult: Result = {
-    type: Like,
-    results: [
-        {
-            property: 'likeableType',
-            column: 'likeable_type'
-        }
-    ]
-};
-
-const GalleryResult: Result = {
-
-    type: Gallery,
-
-    results: [
-        {
-            property: 'userId',
-            column: 'g_user_id'
-        }
-    ],
-
-
-    associations: [
-        {
-            property: 'creator',
-            result: UserResult
-        }
-    ],
-
-    collections: [
-        {
-            property: 'likes',
-            result: LikeResult
-        }
-    ]
-};
-
-@ResultsMap(GalleryResult)
-function queryUser(id: number) {
-    client
-        .from('galleries as g')
-        .select(
-            'g.id as g_id' +
-            'g.user_id as g_user_id')
-        .innerJoin('g.')
-}

@@ -15,6 +15,7 @@ export function ResultsMap(result: Result) {
         descriptor.value = async (...args) => {
 
             const type = <Klass> result.type;
+            const results = result.results;
 
             const ret = await method.apply(target, args);
 
@@ -24,18 +25,27 @@ export function ResultsMap(result: Result) {
 
                     const ins = new type();
 
-                    Object.keys(item).forEach(key => {
-                        if (item.hasOwnProperty(key)) {
-                            ins[key] = item[key];
+                    Object.keys(item).forEach(column => {
+
+                        let property = column;
+
+                        if (results) {
+
+                            const result = results.find(item => item.column === column);
+
+                            if (result) {
+                                property = result.property;
+                            }
+                        }
+
+                        if (item.hasOwnProperty(column)) {
+                            ins[property] = item[column];
                         }
                     });
 
                     return ins;
-
                 });
             }
-
-
         };
 
     };

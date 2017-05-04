@@ -40,3 +40,5 @@ jspm_packages
 
 **/*.js
 **/*.js.map
+
+!test/db/**/*.js
