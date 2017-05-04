@@ -77,7 +77,7 @@ describe("SimpleResultsMap", () => {
 
     const repo = new UserRepository();
 
-    it('can convert simple sql result', async () => {
+    it('can convert simple sql map', async () => {
 
         const users = await repo.selectUsers();
 
@@ -89,7 +89,7 @@ describe("SimpleResultsMap", () => {
         expect(user.hashedPassword).to.be.equal("password1");
     });
 
-    it('can convert simple sql with column map result', async () => {
+    it('can convert simple sql with column map map', async () => {
 
         const users = await repo.selectUsers1();
 

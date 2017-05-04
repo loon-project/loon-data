@@ -3,9 +3,23 @@ enum FetchType {
     EAGER
 }
 
-export interface DataMap {
+export interface Fetchable {
+    // 查询时使用
+    fetchType?: FetchType;
 
-    type: Function;
+    // 查询时使用
+    select?: string;
+}
+
+export interface Prefixable {
+
+    // 处理结果时使用
+    columnPrefix?: string;
+}
+
+export interface DataMap extends Prefixable {
+
+    type?: Function;
 
     results?: ResultMap[];
 
@@ -14,43 +28,20 @@ export interface DataMap {
     collections?: CollectionMap[];
 }
 
-export interface AssociationMap {
+export interface AssociationMap extends DataMap, Fetchable {
 
     property: string;
 
-    type?: Function;
-
     // 处理结果时使用
-    result?: DataMap;
-
-    // 处理结果时使用
-    results?: ResultMap[];
-
-    // 处理结果时使用
-    columnPrefix?: string;
-
-    // 查询时使用
-    fetchType?: FetchType;
-
-    // 查询时使用
-    select?: string;
+    map?: DataMap;
 }
 
-export interface CollectionMap {
+export interface CollectionMap extends DataMap, Fetchable {
 
     property: string;
 
-    type?: Function;
-
-    result?: DataMap;
-
-    association?: AssociationMap;
-
-    collection?: CollectionMap;
-
-    results?: ResultMap[];
-
-    select?: string;
+    // 处理结果时使用
+    map?: DataMap;
 }
 
 
