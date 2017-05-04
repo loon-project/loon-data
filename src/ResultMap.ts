@@ -1,4 +1,4 @@
-import {Result} from "./Result";
+import {DataMap} from "./DataMap";
 
 interface Klass {
     new (...args): any;
@@ -6,7 +6,7 @@ interface Klass {
 }
 
 
-export function ResultsMap(result: Result) {
+export function ResultsMap(result: DataMap) {
 
     return (target: any, key: string, descriptor) => {
 

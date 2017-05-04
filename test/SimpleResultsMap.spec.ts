@@ -2,10 +2,10 @@ import "./TestHelper";
 import {expect} from 'chai';
 import * as Knex from 'knex';
 import {ResultsMap} from "../src/ResultMap";
-import {Result} from "../src/Result";
+import {DataMap} from "../src/DataMap";
 
 
-describe("", () => {
+describe("SimpleResultsMap", () => {
 
     const client = Knex(require('./db/knexfile'));
 
@@ -36,11 +36,11 @@ describe("", () => {
         hashedPassword: string;
     }
 
-    const User1Result: Result = {
+    const User1Result: DataMap = {
         type: User
     };
 
-    const User2Result: Result = {
+    const User2Result: DataMap = {
         type: User,
         results: [
             {

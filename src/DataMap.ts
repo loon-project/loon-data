@@ -3,7 +3,7 @@ enum FetchType {
     EAGER
 }
 
-export interface Result {
+export interface DataMap {
 
     type: Function;
 
@@ -21,7 +21,7 @@ export interface AssociationMap {
     type?: Function;
 
     // 处理结果时使用
-    result?: Result;
+    result?: DataMap;
 
     // 处理结果时使用
     results?: ResultMap[];
@@ -42,7 +42,7 @@ export interface CollectionMap {
 
     type?: Function;
 
-    result?: Result;
+    result?: DataMap;
 
     association?: AssociationMap;
 

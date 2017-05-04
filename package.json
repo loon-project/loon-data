@@ -19,6 +19,8 @@
     "loon": "*"
   },
   "devDependencies": {
+    "@types/chai": "^3.5.2",
+    "@types/mocha": "^2.2.41",
     "chai": "^3.5.0",
     "knex": "^0.13.0",
     "mocha": "^3.3.0",
