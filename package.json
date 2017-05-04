@@ -1,0 +1,23 @@
+{
+  "name": "loon-data",
+  "version": "0.0.1",
+  "description": "Provide Mybatis ResultMap like function for NodeJS with Typescript",
+  "main": "src/index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "npm test"
+  },
+  "author": "vincent.007.cn@gmail.com",
+  "license": "Apache-2.0",
+  "peerDependencies": {
+    "knex": "*",
+    "loon": "*"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.3.0",
+    "ts-node": "^3.0.3"
+  }
+}
