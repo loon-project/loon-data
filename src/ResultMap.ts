@@ -1,10 +1,13 @@
-import {DataMap} from "./DataMap";
+import {DataMap, ResultMap} from "./DataMap";
+import * as _ from 'lodash';
 
 interface Klass {
     new (...args): any;
     name: string;
 }
 
+export function ResultMap(map: DataMap) {
+}
 
 export function ResultsMap(result: DataMap) {
 
@@ -19,32 +22,33 @@ export function ResultsMap(result: DataMap) {
 
             const ret = await method.apply(target, args);
 
-            if (Array.isArray(ret)) {
+            if (_.isEmpty(ret) || _.isEmpty(results)) {
+                return;
+            }
 
-                return ret.map(item => {
+            if (_.isArray(ret)) {
+                const insRet = ret.map(item => {
 
-                    const ins = new type();
+                    let ins;
 
                     Object.keys(item).forEach(column => {
+                        const resultMap = (<ResultMap[]> results).find(item => item.column === column);
 
-                        let property = column;
+                        if (resultMap) {
 
-                        if (results) {
-
-                            const result = results.find(item => item.column === column);
-
-                            if (result) {
-                                property = result.property;
+                            if (typeof ins === 'undefined') {
+                                ins = new type();
                             }
-                        }
 
-                        if (item.hasOwnProperty(column)) {
+                            const property = resultMap.property ? resultMap.property : column;
                             ins[property] = item[column];
                         }
                     });
 
                     return ins;
                 });
+
+                return _.compact(insRet);
             }
         };
 
