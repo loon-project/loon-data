@@ -8,6 +8,7 @@
   },
   "scripts": {
     "test": "npm test",
+    "db:init": "node ./test/db/init.js",
     "db:migrate": "knex --cwd test/db migrate:latest",
     "db:rollback": "knex --cwd test/db migrate:rollback",
     "g:migrate": "knex --cwd test/db migrate:make"
@@ -15,8 +16,7 @@
   "author": "vincent.007.cn@gmail.com",
   "license": "Apache-2.0",
   "peerDependencies": {
-    "knex": "*",
-    "loon": "*"
+    "knex": "*"
   },
   "devDependencies": {
     "@types/chai": "^3.5.2",
@@ -24,6 +24,7 @@
     "chai": "^3.5.0",
     "knex": "^0.13.0",
     "mocha": "^3.3.0",
+    "mysql": "^2.13.0",
     "ts-node": "^3.0.3"
   }
 }
