@@ -6,10 +6,7 @@ interface Klass {
     name: string;
 }
 
-export function ResultMap(map: DataMap) {
-}
-
-export function ResultsMap(result: DataMap) {
+export function ResultMaping(map: DataMap) {
 
     return (target: any, key: string, descriptor) => {
 
@@ -17,8 +14,44 @@ export function ResultsMap(result: DataMap) {
 
         descriptor.value = async (...args) => {
 
-            const type = <Klass> result.type;
-            const results = result.results;
+            const type = <Klass> map.type;
+
+            const results = <ResultMap[]> map.results;
+
+            const ret = await method.apply(target, args);
+
+            if (_.isEmpty(ret) || _.isEmpty(results)) {
+                return;
+            }
+
+            const ins = new type();
+
+            Object.keys(ret[0]).forEach(column => {
+                const resultMap = results.find(item => item.column === column);
+
+                if (resultMap) {
+                    const property = resultMap.property ? resultMap.property : column;
+                    ins[property] = ret[0][column];
+                }
+
+            });
+
+            return ins;
+        };
+
+    };
+}
+
+export function ResultsMaping(map: DataMap) {
+
+    return (target: any, key: string, descriptor) => {
+
+        const method = descriptor.value;
+
+        descriptor.value = async (...args) => {
+
+            const type = <Klass> map.type;
+            const results = map.results;
 
             const ret = await method.apply(target, args);
 
@@ -54,3 +87,5 @@ export function ResultsMap(result: DataMap) {
 
     };
 }
+
+

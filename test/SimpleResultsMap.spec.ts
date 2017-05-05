@@ -1,7 +1,7 @@
 import "./TestHelper";
 import {expect} from 'chai';
 import * as Knex from 'knex';
-import {ResultsMap} from "../src/ResultMap";
+import {ResultsMaping} from "../src/ResultMap";
 import {DataMap} from "../src/DataMap";
 
 
@@ -60,14 +60,14 @@ describe("SimpleResultsMap", () => {
 
     class UserRepository {
 
-        @ResultsMap(User1Result)
+        @ResultsMaping(User1Result)
         public selectUsers() {
             return client
                 .select('id', 'username', 'hashedPassword')
                 .from('users1');
         }
 
-        @ResultsMap(User2Result)
+        @ResultsMaping(User2Result)
         public selectUsers1() {
             return client
                 .select()

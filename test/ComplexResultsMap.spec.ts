@@ -1,7 +1,7 @@
 import "./TestHelper";
 import {expect} from 'chai';
 import * as Knex from 'knex';
-import {ResultsMap} from "../src/ResultMap";
+import {ResultMaping, ResultsMaping} from "../src/ResultMap";
 import {DataMap} from "../src/DataMap";
 
 describe("ComplexResultsMap", () => {
@@ -259,7 +259,7 @@ describe("ComplexResultsMap", () => {
 
     class BlogRepository {
 
-        @ResultsMap(BlogMap)
+        @ResultMaping(BlogMap)
         public queryBlog(id: number) {
             return client.select(
                 'B.id as blog_id',
@@ -301,9 +301,11 @@ describe("ComplexResultsMap", () => {
 
     it('can convert complex type', async () => {
 
-        const ret = await repo.queryBlog(blogId);
+        const ret = await repo.queryBlog(blogId[0]);
 
-        console.log("123");
+        expect(ret instanceof Blog).to.be.true;
+        expect(ret.id).to.be.equal(blogId[0]);
+        expect(ret.title).to.be.equal(blog.title);
     });
 
 });
