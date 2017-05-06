@@ -3,11 +3,14 @@
   "version": "0.0.1",
   "description": "Provide Mybatis ResultMap like function for NodeJS with Typescript",
   "main": "src/index.js",
+  "types": "dts/index.d.ts",
   "directories": {
     "test": "test"
   },
   "scripts": {
+    "prepublish": "npm run tsc:release",
     "test": "npm test",
+    "tsc:release": "tsc --project tsconfig.compile.json",
     "db:init": "node ./test/db/init.js",
     "db:migrate": "knex --cwd test/db migrate:latest",
     "db:rollback": "knex --cwd test/db migrate:rollback",

@@ -55,10 +55,6 @@ export class DataMapParser {
 
             metadata.property = result.property;
 
-            if (!_.isUndefined(result.idAttribute)) {
-                metadata.idAttribute = result.idAttribute;
-            }
-
             if (!_.isUndefined(result.column)) {
                 metadata.column = result.column;
             }
