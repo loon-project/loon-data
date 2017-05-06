@@ -1,6 +1,6 @@
 {
   "name": "loon-data",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Provide Mybatis ResultMap like function for NodeJS with Typescript",
   "main": "lib/index.js",
   "types": "dts/index.d.ts",
