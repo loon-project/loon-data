@@ -14,10 +14,7 @@
     "declarationDir": "dts",
     "types":[
       "node",
-      "express",
-      "reflect-metadata",
-      "chai",
-      "mocha"
+      "reflect-metadata"
     ]
   },
 

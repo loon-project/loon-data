@@ -8,7 +8,6 @@
     "test": "test"
   },
   "scripts": {
-    "prepublish": "npm run tsc:release",
     "test": "npm test",
     "tsc:release": "tsc --project tsconfig.compile.json",
     "db:init": "node ./test/db/init.js",
@@ -29,9 +28,10 @@
     "knex": "^0.13.0",
     "mocha": "^3.3.0",
     "mysql": "^2.13.0",
-    "ts-node": "^3.0.3"
+    "typescript": "^2.3.2"
   },
   "dependencies": {
+    "@types/lodash": "^4.14.64",
     "lodash": "^4.17.4",
     "reflect-metadata": "^0.1.10",
     "source-map-support": "^0.4.15"

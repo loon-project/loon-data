@@ -1,4 +1,4 @@
-enum FetchType {
+export enum FetchType {
     LAZY,
     EAGER
 }

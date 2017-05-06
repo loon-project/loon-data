@@ -42,3 +42,5 @@ jspm_packages
 **/*.js.map
 
 !test/db/**/*.js
+
+dts
