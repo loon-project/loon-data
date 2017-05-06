@@ -69,7 +69,8 @@ const handleMap = (data: any, map: DataMap, isCollection: boolean) => {
             return;
         }
 
-        if (Object.keys(ins).some(key => _.isUndefined(ins[key]) || _.isNull(ins[key]))) {
+
+        if (!Object.keys(ins).some(key => !_.isUndefined(ins[key]) || !_.isNull(ins[key]))) {
             return;
         }
 

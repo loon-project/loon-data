@@ -12,7 +12,6 @@ describe("ComplexResultsMap", () => {
         username: 'Jack',
         password: 'password',
         email: 'jack@gmail.com',
-        bio: 'tech',
         favourite_section: 'NO.1'
     };
 
@@ -20,7 +19,6 @@ describe("ComplexResultsMap", () => {
         username: 'Helen',
         password: 'password',
         email: 'helen@gmail.com',
-        bio: 'history',
         favourite_section: 'NO.1'
     };
 
@@ -308,6 +306,9 @@ describe("ComplexResultsMap", () => {
 
         const blogAuthor = blog.author;
         const blogPostList = blog.posts;
+
+
+        expect(blogAuthor).to.be.not.undefined;
 
         expect(blogAuthor instanceof Author).to.be.true;
         expect(blogPostList instanceof Array).to.be.true;
