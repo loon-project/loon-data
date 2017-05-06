@@ -10,6 +10,19 @@ function isBlank(data) {
     return _.isUndefined(data) || _.isNull(data) || _.isEmpty(data) || _.isNaN(data);
 }
 
+
+class Wrapper {
+
+    data: any;
+
+    indexList: number[];
+
+    constructor(data: any, currentIndex: number) {
+        this.data = data;
+        this.indexList = [currentIndex];
+    }
+}
+
 const handleMap = (data: any, map: DataMap, isCollection: boolean) => {
 
     if (isBlank(data) || isBlank(map) || isBlank(map.results)) {
@@ -48,119 +61,103 @@ const handleMap = (data: any, map: DataMap, isCollection: boolean) => {
         return ins;
     });
 
-    const uniqueInsList: any[] = [];
+    const uniqueInsList: Wrapper[] = [];
 
-    insList.forEach(ins => {
+    insList.forEach((ins, index) => {
 
         if (isBlank(ins)) {
             return;
         }
 
-        if (uniqueInsList.some(uniqueIns => _.isEqual(ins, uniqueIns))) {
+        if (Object.keys(ins).some(key => _.isUndefined(ins[key]) || _.isNull(ins[key]))) {
             return;
         }
 
-        uniqueInsList.push(ins);
+        const uniqueResult = uniqueInsList.some(uniqueIns => {
+
+            if (_.isEqual(ins, uniqueIns.data)) {
+                uniqueIns.indexList.push(index);
+                return true;
+            }
+
+            return false;
+        });
+
+        if (uniqueResult) {
+            return;
+        }
+
+        const wrapper = new Wrapper(ins, index);
+
+        uniqueInsList.push(wrapper);
     });
+
 
     if (isBlank(uniqueInsList)) {
         return;
     }
 
-    const associations = <AssociationMap[]> map.associations;
+    uniqueInsList.forEach(wrapper => {
 
-    if (associations) {
+        const associations = <AssociationMap[]> map.associations;
 
-        associations.map(association => {
+        if (associations) {
 
-            const associationIns = handleMap(data, association, false);
-
-            insList.forEach(ins => {
-                ins[association.property] = associationIns;
+            associations.map(association => {
+                const associationIns = handleMap(data[wrapper.indexList[0]], association, false);
+                wrapper.data[association.property] = associationIns;
             })
-        })
-    }
+        }
 
-    const collections = <CollectionMap[]> map.collections;
+        const collections = <CollectionMap[]> map.collections;
 
-    if (collections) {
+        if (collections) {
 
-        collections.forEach(collection => {
+            collections.forEach(collection => {
 
-            const collectionInsList = handleMap(data, collection, true);
+                const collectionData = wrapper.indexList.map(index => data[index]);
 
-            insList.forEach(ins => {
-                ins[collection.property] = collectionInsList;
-            })
-        });
-    }
+                const collectionInsList = handleMap(collectionData, collection, true);
+
+                wrapper.data[collection.property] = collectionInsList;
+            });
+        }
+
+    });
+
 
     if (isCollection) {
-        return uniqueInsList;
+        return uniqueInsList.map(_ => _.data);
     } else {
-        return uniqueInsList[0];
+        return uniqueInsList[0].data;
     }
 
 };
 
 
 
-export function ResultMaping(map: DataMap) {
+export function ResultMapping(map: DataMap) {
 
     return (target: any, key: string, descriptor) => {
 
         const method = descriptor.value;
 
         descriptor.value = async (...args) => {
-
             const data = await method.apply(target, args);
-
             return handleMap(data, map, false);
         };
     };
 }
 
-export function ResultsMaping(map: DataMap) {
+export function ResultsMapping(map: DataMap) {
 
     return (target: any, key: string, descriptor) => {
 
         const method = descriptor.value;
 
         descriptor.value = async (...args) => {
-
-            const type = <Klass> map.type;
-            const results = map.results;
-
-            const ret = await method.apply(target, args);
-
-            if (_.isEmpty(ret) || _.isEmpty(results)) {
-                return;
-            }
-
-            if (_.isArray(ret)) {
-                const insRet = ret.map(item => {
-
-                    let ins;
-
-                    Object.keys(item).forEach(column => {
-                        const resultMap = (<ResultMap[]> results).find(item => item.column === column);
-
-                        if (resultMap) {
-
-                            if (typeof ins === 'undefined') {
-                                ins = new type();
-                            }
-
-                            const property = resultMap.property ? resultMap.property : column;
-                            ins[property] = item[column];
-                        }
-                    });
-
-                    return ins;
-                });
-
-                return _.compact(insRet);
-            }
+            const data = await method.apply(target, args);
+            return handleMap(data, map, true);
         };
 
     };

@@ -1,7 +1,7 @@
 import "./TestHelper";
 import {expect} from 'chai';
 import * as Knex from 'knex';
-import {ResultsMaping} from "../src/ResultMap";
+import {ResultsMapping} from "../src/ResultMap";
 import {DataMap} from "../src/DataMap";
 
 
@@ -37,7 +37,18 @@ describe("SimpleResultsMap", () => {
     }
 
     const User1Result: DataMap = {
-        type: User
+        type: User,
+        results: [
+            {
+                property: 'id'
+            },
+            {
+                property: 'username'
+            },
+            {
+                property: 'hashedPassword'
+            }
+        ]
     };
 
     const User2Result: DataMap = {
@@ -60,14 +71,14 @@ describe("SimpleResultsMap", () => {
 
     class UserRepository {
 
-        @ResultsMaping(User1Result)
+        @ResultsMapping(User1Result)
         public selectUsers() {
             return client
                 .select('id', 'username', 'hashedPassword')
                 .from('users1');
         }
 
-        @ResultsMaping(User2Result)
+        @ResultsMapping(User2Result)
         public selectUsers1() {
             return client
                 .select()

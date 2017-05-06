@@ -1,8 +1,8 @@
 import "./TestHelper";
 import {expect} from 'chai';
 import * as Knex from 'knex';
-import {ResultMaping, ResultsMaping} from "../src/ResultMap";
-import {DataMap} from "../src/DataMap";
+import {ResultMapping, ResultsMapping} from "../src/ResultMap";
+import {AssociationMap, DataMap} from "../src/DataMap";
 
 describe("ComplexResultsMap", () => {
 
@@ -158,6 +158,37 @@ describe("ComplexResultsMap", () => {
         public posts: Post[];
     }
 
+    const AuthorMap: AssociationMap = {
+        property: 'author',
+        type: Author,
+        results: [
+            {
+                property: 'username',
+                column: 'author_username'
+            },
+
+            {
+                property: 'password',
+                column: 'author_password'
+            },
+
+            {
+                property: 'email',
+                column: 'author_email'
+            },
+
+            {
+                property: 'bio',
+                column: 'author_bio'
+            },
+
+            {
+                property: 'favouriteSection',
+                column: 'author_favourite_section'
+            }
+        ]
+    };
+
     const BlogMap: DataMap = {
 
         type: Blog,
@@ -175,36 +206,7 @@ describe("ComplexResultsMap", () => {
         ],
 
         associations: [
-            {
-                property: 'author',
-                type: Author,
-                results: [
-                    {
-                        property: 'username',
-                        column: 'author_username'
-                    },
-
-                    {
-                        property: 'password',
-                        column: 'author_password'
-                    },
-
-                    {
-                        property: 'email',
-                        column: 'author_email'
-                    },
-
-                    {
-                        property: 'bio',
-                        column: 'author_bio'
-                    },
-
-                    {
-                        property: 'favouriteSection',
-                        column: 'author_favourite_section'
-                    }
-                ]
-            }
+            AuthorMap
         ],
 
         collections: [
@@ -223,10 +225,7 @@ describe("ComplexResultsMap", () => {
                     }
                 ],
                 associations: [
-                    {
-                        property: 'author',
-                        type: Author
-                    }
+                    AuthorMap
                 ],
                 collections: [
                     {
@@ -259,7 +258,7 @@ describe("ComplexResultsMap", () => {
 
     class BlogRepository {
 
-        @ResultMaping(BlogMap)
+        @ResultMapping(BlogMap)
         public queryBlog(id: number) {
             return client.select(
                 'B.id as blog_id',
