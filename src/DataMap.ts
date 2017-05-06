@@ -49,6 +49,5 @@ export interface CollectionMap extends DataMap, Fetchable {
 export interface ResultMap {
     property: string;
     column?: string;
-    idAttribute?: boolean;
     typeHandler?: (...args) => any;
 }

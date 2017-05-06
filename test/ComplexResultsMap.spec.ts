@@ -301,11 +301,16 @@ describe("ComplexResultsMap", () => {
 
     it('can convert complex type', async () => {
 
-        const ret = await repo.queryBlog(blogId[0]);
+        const blog: Blog = await repo.queryBlog(blogId[0]);
 
-        expect(ret instanceof Blog).to.be.true;
-        expect(ret.id).to.be.equal(blogId[0]);
-        expect(ret.title).to.be.equal(blog.title);
+        expect(blog instanceof Blog).to.be.true;
+        expect(blog.id).to.be.equal(blogId[0]);
+        expect(blog.title).to.be.equal(blog.title);
+
+        const blogAuthor = blog.author;
+        const blogPostList = blog.posts;
+
+        expect(blogAuthor instanceof Author).to.be.true;
+        expect(blogPostList instanceof Array).to.be.true;
     });
-
 });
