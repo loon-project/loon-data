@@ -8,6 +8,7 @@
     "test": "test"
   },
   "scripts": {
+    "prepublish": "npm run tsc:release",
     "test": "npm test",
     "tsc:release": "tsc --project tsconfig.compile.json",
     "db:init": "node ./test/db/init.js",
