@@ -305,12 +305,26 @@ describe("ComplexResultsMap", () => {
         expect(blog.title).to.be.equal(blog.title);
 
         const blogAuthor = blog.author;
-        const blogPostList = blog.posts;
-
 
         expect(blogAuthor).to.be.not.undefined;
-
         expect(blogAuthor instanceof Author).to.be.true;
+        expect(blogAuthor.username).to.be.equal("Jack");
+        expect(blogAuthor.password).to.be.equal("password");
+        expect(blogAuthor.email).to.be.equal("jack@gmail.com");
+        expect(blogAuthor.favouriteSection).to.be.equal("NO.1");
+
+        const blogPostList = blog.posts;
         expect(blogPostList instanceof Array).to.be.true;
+        expect(blogPostList.length).to.be.equal(2);
+
+
+        const blogPost1 = blogPostList[0];
+        expect(blogPost1 instanceof Post).to.be.true;
+
+
+
+        const blogPost2 = blogPostList[1];
+        expect(blogPost2 instanceof Post).to.be.true;
+
     });
 });
