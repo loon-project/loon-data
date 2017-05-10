@@ -1,7 +1,7 @@
 import "./TestHelper";
 import {expect} from 'chai';
 import * as Knex from 'knex';
-import {ResultMapping, ResultsMapping} from "../src/ResultMap";
+import {ResultMapping} from "../src/ResultMap";
 import {AssociationMap, DataMap} from "../src/DataMap";
 
 describe("ComplexResultsMap", () => {
