@@ -1,5 +1,6 @@
 import {AssociationMap, CollectionMap, DataMap, ResultMap} from "../DataMap";
 import * as _ from "lodash";
+import {PropertyRegistry} from "loon";
 
 interface Klass {
     new (...args): any;
@@ -29,10 +30,14 @@ const handleMap = (data: any, map: DataMap, isCollection: boolean) => {
         return;
     }
 
+    const type = <Klass> map.type;
+
+    const properties = PropertyRegistry.properties.get(type);
+
     const results: ResultMap[]= <ResultMap[]> map.results;
 
-    if (isBlank(results)) {
-        return;
+    if (isBlank(properties) && isBlank(results)) {
+        return data;
     }
 
     if (!_.isArray(data)) {
@@ -40,7 +45,6 @@ const handleMap = (data: any, map: DataMap, isCollection: boolean) => {
     }
 
     const insList = data.map(item => {
-        const type = <Klass> map.type;
         const ins = new type();
 
         Object.keys(item).forEach(column => {
