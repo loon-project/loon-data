@@ -4,7 +4,7 @@ import {expect} from 'chai';
 describe("ResultMap", () => {
 
     class Developer {
-
+        public id: number;
     }
 
 
@@ -13,14 +13,9 @@ describe("ResultMap", () => {
 
         @ResultMapping({type: Developer})
         public listDeveloper() {
-            return Promise.resolve(() => [
-                {
-                    id: 1,
-                },
-                {
-                    id: 2
-                }
-            ]);
+            return Promise.resolve([
+                { id: 1 },
+                { id: 2 }]);
         }
     }
 
@@ -34,7 +29,11 @@ describe("ResultMap", () => {
 
         expect(Array.isArray(result)).to.be.true;
         expect(result.length).to.be.equal(2);
+
+        expect(result[0] instanceof Developer).to.be.false;
         expect(result[0].id).to.be.equal(1);
+
+        expect(result[1] instanceof Developer).to.be.false;
         expect(result[1].id).to.be.equal(2);
     });
 

@@ -26,8 +26,8 @@ class Wrapper {
 
 const handleMap = (data: any, map: DataMap, isCollection: boolean) => {
 
-    if (isBlank(data) || isBlank(map) || isBlank(map.results)) {
-        return;
+    if (isBlank(data) || isBlank(map)) {
+        return data;
     }
 
     const type = <Klass> map.type;
