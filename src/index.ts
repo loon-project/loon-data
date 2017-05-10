@@ -1,3 +1,5 @@
 
 export * from './DataMap';
-export * from './ResultMap';
+
+export * from './mapping/EntityMapping';
+export * from './mapping/ResultMapping';

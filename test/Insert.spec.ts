@@ -1,8 +1,8 @@
 import {expect} from 'chai';
 import {Property, IConverter, Service} from "loon";
 import * as Knex from 'knex';
-import {ResultMapping} from "../src/ResultMap";
-import {EntityMapping} from "../src/Entity";
+import {ResultMapping} from "../src/mapping/ResultMapping";
+import {EntityMapping} from "../src/mapping/EntityMapping";
 
 
 describe("Insert", () => {

@@ -1,4 +1,4 @@
-import {PropertyRegistry, ConverterService, DependencyRegistry} from "loon";
+import {ConverterService, DependencyRegistry} from "loon";
 
 const converter = DependencyRegistry.get(ConverterService);
 

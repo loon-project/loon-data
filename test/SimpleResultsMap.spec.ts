@@ -1,7 +1,7 @@
 import "./TestHelper";
 import {expect} from 'chai';
 import * as Knex from 'knex';
-import {ResultsMapping} from "../src/ResultMap";
+import {ResultsMapping} from "../src/mapping/ResultMapping";
 import {DataMap} from "../src/DataMap";
 
 

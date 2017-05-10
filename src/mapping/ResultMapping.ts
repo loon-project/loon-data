@@ -1,6 +1,5 @@
-import {AssociationMap, CollectionMap, DataMap, ResultMap} from "./DataMap";
-import {PropertyRegistry} from 'loon';
-import * as _ from 'lodash';
+import {AssociationMap, CollectionMap, DataMap, ResultMap} from "../DataMap";
+import * as _ from "lodash";
 
 interface Klass {
     new (...args): any;
