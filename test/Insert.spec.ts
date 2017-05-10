@@ -1,22 +1,11 @@
 import {expect} from 'chai';
-import {Property, IConverter} from "loon";
+import {Property, IConverter, Service} from "loon";
 import * as Knex from 'knex';
 import {ResultMapping} from "../src/ResultMap";
-
-function Entity() {
-    return (target, key, descriptor) => {
-    }
-}
-
-class SkillConverter implements IConverter {
-
-}
-
+import {EntityMapping} from "../src/Entity";
 
 
 describe("Insert", () => {
-
-
 
 
     class Developer {
@@ -24,7 +13,7 @@ describe("Insert", () => {
         @Property()
         public name: string;
 
-        @Property({converter: })
+        @Property({name: "skillsContent"})
         public skills: string[];
     }
 
@@ -34,8 +23,9 @@ describe("Insert", () => {
 
     class PeopleRepository {
 
-        public insertDeveloper(@Entity() developer: Developer) {
-            return client.from('users').insert(developer);
+        @EntityMapping()
+        public insertDeveloper(developer: Developer) {
+            return developer;
         }
 
         @ResultMapping({type: Developer})
@@ -45,4 +35,20 @@ describe("Insert", () => {
 
     }
 
+    it('can convert EntityMapping to js object', () => {
+
+        const repo = new PeopleRepository();
+        const developer = new Developer();
+
+        developer.name = "AAA";
+        developer.skills = ["code", "design"];
+
+
+        const result = <any> repo.insertDeveloper(developer);
+
+
+        expect(result instanceof Developer).to.be.false;
+        expect(result.name).to.be.equal("AAA");
+        expect(result.skillsContent).to.be.deep.equal(["code", "design"])
+    });
 });
