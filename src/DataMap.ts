@@ -22,8 +22,6 @@ export interface DataMap extends Prefixable {
 
     type?: Function;
 
-    results?: ResultMap[];
-
     prefix?: string;
 
     associations?: AssociationMap[];

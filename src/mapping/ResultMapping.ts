@@ -1,11 +1,7 @@
 import {AssociationMap, CollectionMap, DataMap, ResultMap} from "../DataMap";
 import * as _ from "lodash";
-import {ConverterService, DependencyRegistry, PropertyRegistry} from "loon";
+import {ConverterService, DependencyRegistry, Klass, PropertyRegistry} from "loon";
 
-interface Klass {
-    new (...args): any;
-    name: string;
-}
 
 function isBlank(data) {
     return _.isUndefined(data) || _.isNull(data) || _.isEmpty(data) || _.isNaN(data);
@@ -158,22 +154,15 @@ export function ResultMapping(map: DataMap) {
         const method = descriptor.value;
 
         descriptor.value = (...args) => {
+            const result = method.apply(target, args);
 
-            try {
-                const result = method.apply(target, args);
-
-                if (result && result.then && typeof result.then === 'function') {
-                    return result
-                        .then(data => handleMap(data, map, false))
-                        .catch(e => {throw e});
-                }
-
-                return handleMap(result, map, false);
-
-            } catch (e) {
-                throw e;
+            if (result && result.then && typeof result.then === 'function') {
+                return result
+                    .then(data => handleMap(data, map, false))
+                    .catch(e => {throw e});
             }
 
+            return handleMap(result, map, false);
         };
     };
 }
@@ -186,20 +175,15 @@ export function ResultsMapping(map: DataMap) {
 
         descriptor.value = (...args) => {
 
-            try {
-                const result = method.apply(target, args);
+            const result = method.apply(target, args);
 
-                if (result && result.then && typeof result.then === 'function') {
-                    return result
-                        .then(data => handleMap(data, map, true))
-                        .catch(e => {throw e});
-                }
-
-                return handleMap(result, map, true);
-
-            } catch (e) {
-                throw e;
+            if (result && result.then && typeof result.then === 'function') {
+                return result
+                    .then(data => handleMap(data, map, true))
+                    .catch(e => {throw e});
             }
+
+            return handleMap(result, map, true);
         };
 
     };
