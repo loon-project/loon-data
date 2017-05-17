@@ -35,12 +35,6 @@ const handleMap = (data: any, map: DataMap, isCollection: boolean) => {
     if (typeof properties !== 'undefined') {
     }
 
-    const results: ResultMap[]= <ResultMap[]> map.results;
-
-    if (isBlank(properties) && isBlank(results)) {
-        return data;
-    }
-
     if (!_.isArray(data)) {
         data = [data];
     }
@@ -107,6 +101,7 @@ const handleMap = (data: any, map: DataMap, isCollection: boolean) => {
     if (isBlank(uniqueInsList)) {
         return;
     }
+
 
     uniqueInsList.forEach(wrapper => {
 

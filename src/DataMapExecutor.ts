@@ -1,6 +1,6 @@
 import {DataMap} from "./DataMap";
 import * as _ from 'lodash';
-import {Klass, PropertyRegistry} from "loon";
+import {ConverterService, DependencyRegistry, Klass, PropertyRegistry} from "loon";
 
 export class DataMapExecutor {
 
@@ -30,8 +30,10 @@ export class DataMapExecutor {
             data = [data];
         }
 
-        data.map(dataItem => {
+        const converter = DependencyRegistry.get(ConverterService);
 
+        data.map(dataItem => {
+            return converter.convert(dataItem, type, {prefix: map.prefix});
         });
 
 
