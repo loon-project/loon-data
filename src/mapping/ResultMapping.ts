@@ -1,6 +1,6 @@
 import {AssociationMap, CollectionMap, DataMap, ResultMap} from "../DataMap";
 import * as _ from "lodash";
-import {PropertyRegistry} from "loon";
+import {ConverterService, DependencyRegistry, PropertyRegistry} from "loon";
 
 interface Klass {
     new (...args): any;
@@ -24,6 +24,8 @@ class Wrapper {
     }
 }
 
+const converter = DependencyRegistry.get(ConverterService);
+
 const handleMap = (data: any, map: DataMap, isCollection: boolean) => {
 
     if (isBlank(data) || isBlank(map)) {
@@ -33,6 +35,9 @@ const handleMap = (data: any, map: DataMap, isCollection: boolean) => {
     const type = <Klass> map.type;
 
     const properties = PropertyRegistry.properties.get(type);
+
+    if (typeof properties !== 'undefined') {
+    }
 
     const results: ResultMap[]= <ResultMap[]> map.results;
 
@@ -45,24 +50,29 @@ const handleMap = (data: any, map: DataMap, isCollection: boolean) => {
     }
 
     const insList = data.map(item => {
-        const ins = new type();
 
-        Object.keys(item).forEach(column => {
+        const properties = PropertyRegistry.properties.get(type);
 
-            const resultMap = results.find(result => {
+        if (typeof properties !== 'undefined') {
+            return converter.convert(item, type, {prefix: map.prefix});
+        }
 
-                const resultColumn = result.column ? result.column : result.property;
-
-                return resultColumn === column;
-            });
-
-            if (resultMap) {
-                const property = resultMap.property ? resultMap.property : column;
-                ins[property] = item[column];
-            }
-        });
-
-        return ins;
+        // Object.keys(item).forEach(column => {
+        //
+        //     const resultMap = results.find(result => {
+        //
+        //         const resultColumn = result.column ? result.column : result.property;
+        //
+        //         return resultColumn === column;
+        //     });
+        //
+        //     if (resultMap) {
+        //         const property = resultMap.property ? resultMap.property : column;
+        //         ins[property] = item[column];
+        //     }
+        // });
+        //
+        // return ins;
     });
 
     const uniqueInsList: Wrapper[] = [];
@@ -147,9 +157,23 @@ export function ResultMapping(map: DataMap) {
 
         const method = descriptor.value;
 
-        descriptor.value = async (...args) => {
-            const data = await method.apply(target, args);
-            return handleMap(data, map, false);
+        descriptor.value = (...args) => {
+
+            try {
+                const result = method.apply(target, args);
+
+                if (result && result.then && typeof result.then === 'function') {
+                    return result
+                        .then(data => handleMap(data, map, false))
+                        .catch(e => {throw e});
+                }
+
+                return handleMap(result, map, false);
+
+            } catch (e) {
+                throw e;
+            }
+
         };
     };
 }
@@ -160,9 +184,22 @@ export function ResultsMapping(map: DataMap) {
 
         const method = descriptor.value;
 
-        descriptor.value = async (...args) => {
-            const data = await method.apply(target, args);
-            return handleMap(data, map, true);
+        descriptor.value = (...args) => {
+
+            try {
+                const result = method.apply(target, args);
+
+                if (result && result.then && typeof result.then === 'function') {
+                    return result
+                        .then(data => handleMap(data, map, true))
+                        .catch(e => {throw e});
+                }
+
+                return handleMap(result, map, true);
+
+            } catch (e) {
+                throw e;
+            }
         };
 
     };

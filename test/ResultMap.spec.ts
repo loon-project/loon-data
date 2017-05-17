@@ -10,7 +10,6 @@ describe("ResultMap", () => {
 
     class TestResultMapRepository {
 
-
         @ResultMapping({type: Developer})
         public listDeveloper() {
             return Promise.resolve([
