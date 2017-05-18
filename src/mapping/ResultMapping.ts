@@ -1,6 +1,7 @@
 import {AssociationMap, CollectionMap, DataMap, ResultMap} from "../DataMap";
 import * as _ from "lodash";
 import {ConverterService, DependencyRegistry, Klass, PropertyRegistry} from "loon";
+import {DataMapExecutor} from "../DataMapExecutor";
 
 
 function isBlank(data) {
@@ -141,6 +142,7 @@ const handleMap = (data: any, map: DataMap, isCollection: boolean) => {
 };
 
 
+const executor = new DataMapExecutor();
 
 export function ResultMapping(map: DataMap) {
 
@@ -153,11 +155,11 @@ export function ResultMapping(map: DataMap) {
 
             if (result && result.then && typeof result.then === 'function') {
                 return result
-                    .then(data => handleMap(data, map, false))
+                    .then(result => executor.exec(result, map, false))
                     .catch(e => {throw e});
             }
 
-            return handleMap(result, map, false);
+            return executor.exec(result, map, false);
         };
     };
 }
@@ -174,11 +176,11 @@ export function ResultsMapping(map: DataMap) {
 
             if (result && result.then && typeof result.then === 'function') {
                 return result
-                    .then(data => handleMap(data, map, true))
+                    .then(result => executor.exec(result, map, true))
                     .catch(e => {throw e});
             }
 
-            return handleMap(result, map, true);
+            return executor.exec(result, map, true);
         };
 
     };
