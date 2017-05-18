@@ -5,7 +5,7 @@ import {ResultMapping} from "../src/mapping/ResultMapping";
 import {EntityMapping} from "../src/mapping/EntityMapping";
 
 
-describe("Insert", () => {
+describe("EntityMapping", () => {
 
 
     class Developer {
@@ -17,20 +17,11 @@ describe("Insert", () => {
         public skills: string[];
     }
 
-
-    const client = Knex(require('./db/knexfile'));
-
-
     class PeopleRepository {
 
         @EntityMapping()
         public insertDeveloper(developer: Developer) {
             return developer;
-        }
-
-        @ResultMapping({type: Developer})
-        public findBy(id: number) {
-            return client.from('users').where({id});
         }
 
     }
@@ -42,7 +33,6 @@ describe("Insert", () => {
 
         developer.name = "AAA";
         developer.skills = ["code", "design"];
-
 
         const result = <any> repo.insertDeveloper(developer);
 

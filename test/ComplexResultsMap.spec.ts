@@ -1,12 +1,10 @@
 import "./TestHelper";
-import {expect} from 'chai';
-import * as Knex from 'knex';
+import {expect} from "chai";
 import {ResultMapping} from "../src/mapping/ResultMapping";
 import {AssociationMap, DataMap} from "../src/DataMap";
+import {Property} from "loon";
 
 describe("ComplexResultsMap", () => {
-
-    const client = Knex(require('./db/knexfile'));
 
     const author1 = {
         username: 'Jack',
@@ -50,158 +48,86 @@ describe("ComplexResultsMap", () => {
         body: "body 2"
     };
 
-    let blogId;
-
-    before(async () => {
-
-
-        const author1Id = await client.from('authors1').insert(author1);
-        const author2Id = await client.from('authors1').insert(author2);
-
-        const tag1Id = await client.from('tags1').insert(tag1);
-        const tag2Id = await client.from('tags1').insert(tag2);
-
-        blogId = await client
-            .from('blogs1')
-            .insert(Object.assign({}, blog, {author_id: author1Id}));
-
-        const post1Id = await client
-            .from('posts1')
-            .insert(Object.assign({}, post1, {blog_id: blogId, author_id: author1Id}));
-
-        const post2Id = await client
-            .from('posts1')
-            .insert(Object.assign({}, post2, {blog_id: blogId, author_id: author1Id}));
-
-
-        await client
-            .from('posts_tags1')
-            .insert([
-                {
-                    post_id: post1Id,
-                    tag_id: tag1Id
-                },
-                {
-                    post_id: post1Id,
-                    tag_id: tag2Id
-                },
-                {
-                    post_id: post2Id,
-                    tag_id: tag1Id
-                }
-            ]);
-
-        await client
-            .from('comments1')
-            .insert([
-                {
-                    post_id: post1Id,
-                    name: "1",
-                    comment: "c1"
-                },
-                {
-                    post_id: post1Id,
-                    name: "2",
-                    comment: "c2"
-                },
-                {
-                    post_id: post1Id,
-                    name: "3",
-                    comment: "c3"
-                }
-            ])
-    });
-
-    after(async () => {
-        await client.from('authors1').del();
-        await client.from('blogs1').del();
-        await client.from('comments1').del();
-        await client.from('posts_tags1').del();
-        await client.from('posts1').del();
-        await client.from('tags1').del();
-    });
-
     class Comment {
+
+        @Property()
         public id: number;
+
+        @Property()
         public postId: number;
+
+        @Property()
         public name: string;
+
         public comment: string;
     }
 
     class Tag {
+
+        @Property()
         public id: number;
     }
 
     class Author {
+
+        @Property()
         public id: number;
+
+        @Property()
         public username: string;
+
+        @Property()
         public password: string;
+
+        @Property()
         public email: string;
+
+        @Property()
         public bio: string;
+
+        @Property('favourite_section')
         public favouriteSection: string;
     }
 
     class Post {
+
+        @Property()
         public id: number;
+
+        @Property()
         public subject: string;
+
         public author: Author;
+
         public comments: Comment[];
+
         public tags: Tag[];
     }
 
     class Blog {
+
+        @Property()
         public id: number;
+
+        @Property()
         public title: string;
+
         public author: Author;
+
         public posts: Post[];
     }
 
     const AuthorMap: AssociationMap = {
         property: 'author',
         type: Author,
-        results: [
-            {
-                property: 'username',
-                column: 'author_username'
-            },
-
-            {
-                property: 'password',
-                column: 'author_password'
-            },
-
-            {
-                property: 'email',
-                column: 'author_email'
-            },
-
-            {
-                property: 'bio',
-                column: 'author_bio'
-            },
-
-            {
-                property: 'favouriteSection',
-                column: 'author_favourite_section'
-            }
-        ]
+        prefix: 'author_'
     };
 
     const BlogMap: DataMap = {
 
         type: Blog,
 
-        results: [
-            {
-                property: 'id',
-                column: 'blog_id'
-            },
-
-            {
-                property: 'title',
-                column: 'blog_title'
-            }
-        ],
+        prefix: 'blog_',
 
         associations: [
             AuthorMap
@@ -211,41 +137,23 @@ describe("ComplexResultsMap", () => {
             {
                 property: 'posts',
                 type: Post,
-                results: [
-                    {
-                        property: 'id',
-                        column: 'post_id'
-                    },
+                prefix: 'post_',
 
-                    {
-                        property: 'subject',
-                        column: 'post_subject'
-                    }
-                ],
                 associations: [
                     AuthorMap
                 ],
+
                 collections: [
                     {
                         property: 'comments',
                         type: Comment,
-                        results: [
-                            {
-                                property: 'id',
-                                column: 'comment_id'
-                            }
-                        ]
+                        prefix: 'comment_'
                     },
 
                     {
                         property: 'tags',
                         type: Tag,
-                        results: [
-                            {
-                                property: 'id',
-                                column: 'tag_id'
-                            }
-                        ]
+                        prefix: 'tag_'
                     }
                 ]
 
@@ -253,55 +161,292 @@ describe("ComplexResultsMap", () => {
         ]
 
     };
+    /**
+     * SQL:
+     * select(
+     *     'B.id as blog_id',
+     *     'B.title as blog_title',
+     *     'B.author_id as blog_author_id',
+     *     'A.id as author_id',
+     *     'A.username as author_username',
+     *     'A.password as author_password',
+     *     'A.email as author_email',
+     *     'A.bio as author_bio',
+     *     'A.favourite_section as author_favourite_section',
+     *     'P.id as post_id',
+     *     'P.blog_id as post_blog_id',
+     *     'P.author_id as post_author_id',
+     *     'P.created_on as post_created_on',
+     *     'P.section as post_section',
+     *     'P.subject as post_subject',
+     *     'P.draft as post_draft',
+     *     'P.body as post_body',
+     *     'C.id as comment_id',
+     *     'C.post_id as comment_post_id',
+     *     'C.name as comment_name',
+     *     'C.comment as comment_text',
+     *     'T.id as tag_id',
+     *     'T.name as tag_name'
+     *   )
+     *   .from('blogs1 as B')
+     *   .leftOuterJoin('authors1 as A', 'A.id', 'B.author_id')
+     *   .leftOuterJoin('posts1 as P', 'P.blog_id', 'B.id')
+     *   .leftOuterJoin('comments1 as C', 'C.post_id', 'P.id')
+     *   .leftOuterJoin('posts_tags1 as PT', 'PT.post_id', 'P.id')
+     *   .leftOuterJoin('tags1 as T', 'T.id', 'PT.tag_id')
+     *   .where({'B.id': id})
+     *
+     * Tables:
+     *   CREATE TABLE `authors1` (
+     *     `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+     *     `username` varchar(255) DEFAULT NULL,
+     *     `password` varchar(255) DEFAULT NULL,
+     *     `email` varchar(255) DEFAULT NULL,
+     *     `bio` varchar(255) DEFAULT NULL,
+     *     `favourite_section` varchar(255) DEFAULT NULL,
+     *     PRIMARY KEY (`id`)
+     *   ) ENGINE=InnoDB AUTO_INCREMENT=89 DEFAULT CHARSET=utf8;
+     *
+     *   CREATE TABLE `blogs1` (
+     *     `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+     *     `title` varchar(255) DEFAULT NULL,
+     *     `author_id` int(11) DEFAULT NULL,
+     *     PRIMARY KEY (`id`)
+     *   ) ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=utf8;
+
+     *   CREATE TABLE `comments1` (
+     *     `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+     *     `post_id` int(11) DEFAULT NULL,
+     *     `name` varchar(255) DEFAULT NULL,
+     *     `comment` varchar(255) DEFAULT NULL,
+     *     PRIMARY KEY (`id`)
+     *   ) ENGINE=InnoDB AUTO_INCREMENT=133 DEFAULT CHARSET=utf8;
+
+     *   CREATE TABLE `posts_tags1` (
+     *     `post_id` int(11) DEFAULT NULL,
+     *     `tag_id` int(11) DEFAULT NULL
+     *   ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+     *   CREATE TABLE `posts1` (
+     *     `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+     *     `blog_id` int(11) DEFAULT NULL,
+     *     `author_id` int(11) DEFAULT NULL,
+     *     `created_on` varchar(255) DEFAULT NULL,
+     *     `section` varchar(255) DEFAULT NULL,
+     *     `subject` varchar(255) DEFAULT NULL,
+     *     `draft` tinyint(1) DEFAULT NULL,
+     *     `body` varchar(255) DEFAULT NULL,
+     *     PRIMARY KEY (`id`)
+     *   ) ENGINE=InnoDB AUTO_INCREMENT=89 DEFAULT CHARSET=utf8;
+
+     *   CREATE TABLE `tags1` (
+     *     `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+     *     `name` varchar(255) DEFAULT NULL,
+     *     PRIMARY KEY (`id`)
+     *   ) ENGINE=InnoDB AUTO_INCREMENT=89 DEFAULT CHARSET=utf8;
+
+     *   CREATE TABLE `users1` (
+     *     `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+     *     `username` varchar(255) DEFAULT NULL,
+     *     `hashedPassword` varchar(255) DEFAULT NULL,
+     *     PRIMARY KEY (`id`)
+     *   ) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8;
+     */
 
     class BlogRepository {
 
         @ResultMapping(BlogMap)
-        public queryBlog(id: number) {
-            return client.select(
-                'B.id as blog_id',
-                'B.title as blog_title',
-                'B.author_id as blog_author_id',
-                'A.id as author_id',
-                'A.username as author_username',
-                'A.password as author_password',
-                'A.email as author_email',
-                'A.bio as author_bio',
-                'A.favourite_section as author_favourite_section',
-                'P.id as post_id',
-                'P.blog_id as post_blog_id',
-                'P.author_id as post_author_id',
-                'P.created_on as post_created_on',
-                'P.section as post_section',
-                'P.subject as post_subject',
-                'P.draft as draft',
-                'P.body as post_body',
-                'C.id as comment_id',
-                'C.post_id as comment_post_id',
-                'C.name as comment_name',
-                'C.comment as comment_text',
-                'T.id as tag_id',
-                'T.name as tag_name'
-            )
-                .from('blogs1 as B')
-                .leftOuterJoin('authors1 as A', 'A.id', 'B.author_id')
-                .leftOuterJoin('posts1 as P', 'P.blog_id', 'B.id')
-                .leftOuterJoin('comments1 as C', 'C.post_id', 'P.id')
-                .leftOuterJoin('posts_tags1 as PT', 'PT.post_id', 'P.id')
-                .leftOuterJoin('tags1 as T', 'T.id', 'PT.tag_id')
-                .where({'B.id': id});
+        public queryBlog() {
+            return [
+                {
+                    "blog_id": 44,
+                    "blog_title": "great blog",
+                    "blog_author_id": 87,
+                    "author_id": 87,
+                    "author_username": "Jack",
+                    "author_password": "password",
+                    "author_email": "jack@gmail.com",
+                    "author_bio": null,
+                    "author_favourite_section": "NO.1",
+                    "post_id": 87,
+                    "post_blog_id": 44,
+                    "post_author_id": 87,
+                    "post_created_on": "2077-07-07",
+                    "post_section": "s1",
+                    "post_subject": "first blog",
+                    "post_draft": 1,
+                    "post_body": "body 1",
+                    "comment_id": 130,
+                    "comment_post_id": 87,
+                    "comment_name": "1",
+                    "comment_text": "c1",
+                    "tag_id": 87,
+                    "tag_name": "great"
+                },
+                {
+                    "blog_id": 44,
+                    "blog_title": "great blog",
+                    "blog_author_id": 87,
+                    "author_id": 87,
+                    "author_username": "Jack",
+                    "author_password": "password",
+                    "author_email": "jack@gmail.com",
+                    "author_bio": null,
+                    "author_favourite_section": "NO.1",
+                    "post_id": 87,
+                    "post_blog_id": 44,
+                    "post_author_id": 87,
+                    "post_created_on": "2077-07-07",
+                    "post_section": "s1",
+                    "post_subject": "first blog",
+                    "post_draft": 1,
+                    "post_body": "body 1",
+                    "comment_id": 131,
+                    "comment_post_id": 87,
+                    "comment_name": "2",
+                    "comment_text": "c2",
+                    "tag_id": 87,
+                    "tag_name": "great"
+                },
+                {
+                    "blog_id": 44,
+                    "blog_title": "great blog",
+                    "blog_author_id": 87,
+                    "author_id": 87,
+                    "author_username": "Jack",
+                    "author_password": "password",
+                    "author_email": "jack@gmail.com",
+                    "author_bio": null,
+                    "author_favourite_section": "NO.1",
+                    "post_id": 87,
+                    "post_blog_id": 44,
+                    "post_author_id": 87,
+                    "post_created_on": "2077-07-07",
+                    "post_section": "s1",
+                    "post_subject": "first blog",
+                    "post_draft": 1,
+                    "post_body": "body 1",
+                    "comment_id": 132,
+                    "comment_post_id": 87,
+                    "comment_name": "3",
+                    "comment_text": "c3",
+                    "tag_id": 87,
+                    "tag_name": "great"
+                },
+                {
+                    "blog_id": 44,
+                    "blog_title": "great blog",
+                    "blog_author_id": 87,
+                    "author_id": 87,
+                    "author_username": "Jack",
+                    "author_password": "password",
+                    "author_email": "jack@gmail.com",
+                    "author_bio": null,
+                    "author_favourite_section": "NO.1",
+                    "post_id": 87,
+                    "post_blog_id": 44,
+                    "post_author_id": 87,
+                    "post_created_on": "2077-07-07",
+                    "post_section": "s1",
+                    "post_subject": "first blog",
+                    "post_draft": 1,
+                    "post_body": "body 1",
+                    "comment_id": 130,
+                    "comment_post_id": 87,
+                    "comment_name": "1",
+                    "comment_text": "c1",
+                    "tag_id": 88,
+                    "tag_name": "cloud"
+                },
+                {
+                    "blog_id": 44,
+                    "blog_title": "great blog",
+                    "blog_author_id": 87,
+                    "author_id": 87,
+                    "author_username": "Jack",
+                    "author_password": "password",
+                    "author_email": "jack@gmail.com",
+                    "author_bio": null,
+                    "author_favourite_section": "NO.1",
+                    "post_id": 87,
+                    "post_blog_id": 44,
+                    "post_author_id": 87,
+                    "post_created_on": "2077-07-07",
+                    "post_section": "s1",
+                    "post_subject": "first blog",
+                    "post_draft": 1,
+                    "post_body": "body 1",
+                    "comment_id": 131,
+                    "comment_post_id": 87,
+                    "comment_name": "2",
+                    "comment_text": "c2",
+                    "tag_id": 88,
+                    "tag_name": "cloud"
+                },
+                {
+                    "blog_id": 44,
+                    "blog_title": "great blog",
+                    "blog_author_id": 87,
+                    "author_id": 87,
+                    "author_username": "Jack",
+                    "author_password": "password",
+                    "author_email": "jack@gmail.com",
+                    "author_bio": null,
+                    "author_favourite_section": "NO.1",
+                    "post_id": 87,
+                    "post_blog_id": 44,
+                    "post_author_id": 87,
+                    "post_created_on": "2077-07-07",
+                    "post_section": "s1",
+                    "post_subject": "first blog",
+                    "post_draft": 1,
+                    "post_body": "body 1",
+                    "comment_id": 132,
+                    "comment_post_id": 87,
+                    "comment_name": "3",
+                    "comment_text": "c3",
+                    "tag_id": 88,
+                    "tag_name": "cloud"
+                },
+                {
+                    "blog_id": 44,
+                    "blog_title": "great blog",
+                    "blog_author_id": 87,
+                    "author_id": 87,
+                    "author_username": "Jack",
+                    "author_password": "password",
+                    "author_email": "jack@gmail.com",
+                    "author_bio": null,
+                    "author_favourite_section": "NO.1",
+                    "post_id": 88,
+                    "post_blog_id": 44,
+                    "post_author_id": 87,
+                    "post_created_on": "2077-07-17",
+                    "post_section": "s2",
+                    "post_subject": "second blog",
+                    "post_draft": 0,
+                    "post_body": "body 2",
+                    "comment_id": null,
+                    "comment_post_id": null,
+                    "comment_name": null,
+                    "comment_text": null,
+                    "tag_id": 87,
+                    "tag_name": "great"
+                }
+            ];
         }
     }
 
-    const repo = new BlogRepository();
 
 
-    it('can convert complex type', async () => {
+    it('can convert complex type', () => {
 
-        const blog: Blog = await repo.queryBlog(blogId[0]);
+        const repo = new BlogRepository();
+
+        const blog: any = repo.queryBlog();
 
         expect(blog instanceof Blog).to.be.true;
-        expect(blog.id).to.be.equal(blogId[0]);
+        expect(blog.id).to.be.equal(44);
         expect(blog.title).to.be.equal(blog.title);
 
         const blogAuthor = blog.author;
@@ -320,8 +465,6 @@ describe("ComplexResultsMap", () => {
 
         const blogPost1 = blogPostList[0];
         expect(blogPost1 instanceof Post).to.be.true;
-
-
 
         const blogPost2 = blogPostList[1];
         expect(blogPost2 instanceof Post).to.be.true;

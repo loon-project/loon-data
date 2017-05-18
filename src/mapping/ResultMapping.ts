@@ -1,4 +1,4 @@
-import {AssociationMap, CollectionMap, DataMap, ResultMap} from "../DataMap";
+import {AssociationMap, CollectionMap, DataMap} from "../DataMap";
 import * as _ from "lodash";
 import {ConverterService, DependencyRegistry, Klass, PropertyRegistry} from "loon";
 import {DataMapExecutor} from "../DataMapExecutor";
@@ -155,7 +155,10 @@ export function ResultMapping(map: DataMap) {
 
             if (result && result.then && typeof result.then === 'function') {
                 return result
-                    .then(result => executor.exec(result, map, false))
+                    .then(result => {
+                        debugger;
+                        executor.exec(result, map, false)
+                    })
                     .catch(e => {throw e});
             }
 

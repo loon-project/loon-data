@@ -40,7 +40,9 @@ export class DataMapExecutor {
                     const cacheKey = this.cacheKey(map.property, id);
                     const ins = this.getIns(cacheKey, associationCache, dataItem, map);
 
-                    mainIns[map.property] = ins;
+                    if (ins) {
+                        mainIns[map.property] = ins;
+                    }
                 });
             }
 
@@ -51,29 +53,23 @@ export class DataMapExecutor {
                      const cacheKey = this.cacheKey(map.property, id);
                      const ins = this.getIns(cacheKey, collectionCache, dataItem, map);
 
-                     if (mainIns[map.property]) {
-
-                         for (let i = 0; i < mainIns[map.property].length; i++) {
-                             if (mainIns[map.property][i].id === ins.id) {
-                                 return;
-                             }
+                     if (ins) {
+                         if (mainIns[map.property]) {
+                             mainIns[map.property].push(ins);
+                         } else {
+                             mainIns[map.property] = [ins];
                          }
-
-                         return mainIns[map.property].push(ins);
-
-                     } else {
-                         mainIns[map.property] = [ins];
                      }
                 });
             }
         });
 
+        const dataArr = _.flatten(Array.from(mainCache)).filter((_, i) => i % 2 === 1);
+
         if (isCollection) {
-            return Array.from(mainCache.entries())
+            return dataArr;
         } else {
-            if (mainCache.size > 0) {
-                return mainCache.entries().next().value
-            }
+            return dataArr[0];
         }
     }
 
@@ -82,6 +78,9 @@ export class DataMapExecutor {
     }
 
     private cacheKey(property: string, id: number) {
+        if (typeof id === 'undefined' || id === null) {
+            return;
+        }
         return `${property}-${id}`;
     }
 
@@ -90,17 +89,17 @@ export class DataMapExecutor {
         const type = <Klass> map.type;
 
         let ins = cacheStore.get(cacheKey);
+        const converter = DependencyRegistry.get(ConverterService);
+
+        if (typeof cacheKey === 'undefined') {
+            return;
+        }
 
         if (typeof ins === 'undefined') {
-
-            const converter = DependencyRegistry.get(ConverterService);
             ins = converter.convert(data, type, {prefix: map.prefix});
             cacheStore.set(cacheKey, ins);
         }
 
         return ins;
     }
-
-
-
 }
