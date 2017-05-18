@@ -142,7 +142,6 @@ const handleMap = (data: any, map: DataMap, isCollection: boolean) => {
 };
 
 
-const executor = new DataMapExecutor();
 
 export function ResultMapping(map: DataMap) {
 
@@ -151,14 +150,13 @@ export function ResultMapping(map: DataMap) {
         const method = descriptor.value;
 
         descriptor.value = (...args) => {
+            const executor = new DataMapExecutor();
+
             const result = method.apply(target, args);
 
             if (result && result.then && typeof result.then === 'function') {
                 return result
-                    .then(result => {
-                        debugger;
-                        executor.exec(result, map, false)
-                    })
+                    .then(result => executor.exec(result, map, false))
                     .catch(e => {throw e});
             }
 
@@ -174,6 +172,8 @@ export function ResultsMapping(map: DataMap) {
         const method = descriptor.value;
 
         descriptor.value = (...args) => {
+
+            const executor = new DataMapExecutor();
 
             const result = method.apply(target, args);
 

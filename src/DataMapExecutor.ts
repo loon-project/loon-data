@@ -1,8 +1,13 @@
 import {DataMap} from "./DataMap";
 import * as _ from "lodash";
-import {ConverterService, DependencyRegistry, Klass} from "loon";
+import * as FP from "lodash/fp";
+import {ConverterService, DependencyRegistry} from "loon";
 
 export class DataMapExecutor {
+
+    private cacheStore: Map<string, Function> = new Map();
+
+    private converter = DependencyRegistry.get(ConverterService);
 
     public exec(data: any, map: DataMap, isCollection: boolean) {
 
@@ -23,24 +28,16 @@ export class DataMapExecutor {
             data = [data];
         }
 
-        const mainCache: Map<number, Function> = new Map();
-        const associationCache: Map<string, Function> = new Map();
-        const collectionCache: Map<string, Function> = new Map();
+        const result = data.map(dataItem => {
 
-        data.map(dataItem => {
-
-            const mainId = this.getId(map, dataItem);
-
-            const mainIns = this.getIns(mainId, mainCache, dataItem, map);
+            const mainIns = this.getIns(map, dataItem);
 
             if (map.associations) {
                 map.associations.map(map => {
 
-                    const id = this.getId(map, dataItem);
-                    const cacheKey = this.cacheKey(map.property, id);
-                    const ins = this.getIns(cacheKey, associationCache, dataItem, map);
+                    const ins = this.exec(dataItem, map, false);
 
-                    if (ins) {
+                    if (ins && typeof ins.id !== 'undefined' && ins.id !== null) {
                         mainIns[map.property] = ins;
                     }
                 });
@@ -49,57 +46,55 @@ export class DataMapExecutor {
             if (map.collections) {
                  map.collections.map(map => {
 
-                     const id = this.getId(map, dataItem);
-                     const cacheKey = this.cacheKey(map.property, id);
-                     const ins = this.getIns(cacheKey, collectionCache, dataItem, map);
+                     const ins = this.exec(dataItem, map, false);
 
-                     if (ins) {
+                     if (ins && typeof ins.id !== 'undefined' && ins.id !== null) {
+
                          if (mainIns[map.property]) {
-                             mainIns[map.property].push(ins);
+
+                             if (mainIns[map.property].map(_ => _.id).indexOf(ins.id) === -1) {
+                                 mainIns[map.property].push(ins);
+                             }
+
                          } else {
                              mainIns[map.property] = [ins];
                          }
                      }
                 });
             }
+
+            return this.getCacheKey(map, dataItem);
         });
 
-        const dataArr = _.flatten(Array.from(mainCache)).filter((_, i) => i % 2 === 1);
+        const insList = FP.flow(
+            FP.uniq,
+            FP.map(cacheKey => this.cacheStore.get(<string> cacheKey)),
+            FP.compact
+        )(result);
 
         if (isCollection) {
-            return dataArr;
+            return insList;
         } else {
-            return dataArr[0];
+            return insList[0];
         }
     }
 
-    private getId(map: DataMap, data: any) {
-        return map.prefix ? data[`${map.prefix}id`] : data['id'];
-    }
+    private getIns(map: DataMap, data: any) {
 
-    private cacheKey(property: string, id: number) {
-        if (typeof id === 'undefined' || id === null) {
-            return;
-        }
-        return `${property}-${id}`;
-    }
+        const cacheKey = this.getCacheKey(map, data);
 
-    private getIns(cacheKey, cacheStore, data, map) {
-
-        const type = <Klass> map.type;
-
-        let ins = cacheStore.get(cacheKey);
-        const converter = DependencyRegistry.get(ConverterService);
-
-        if (typeof cacheKey === 'undefined') {
-            return;
-        }
+        let ins = this.cacheStore.get(cacheKey);
 
         if (typeof ins === 'undefined') {
-            ins = converter.convert(data, type, {prefix: map.prefix});
-            cacheStore.set(cacheKey, ins);
+            ins = <Function> this.converter.convert(data, map.type, {prefix: map.prefix});
+            this.cacheStore.set(cacheKey, ins);
         }
 
         return ins;
+    }
+
+    private getCacheKey(map: DataMap, data: any) {
+        const idColumn = map.prefix ? `${map.prefix}id` : 'id';
+        return `${idColumn}-${data[idColumn]}`;
     }
 }
