@@ -6,8 +6,8 @@ export interface DataMap {
     // for complex query avoid of conflict
     prefix?: string;
 
-    // improve the performance
-    primaryKey?: string;
+    // default is column `id`, it could be any column used to distinguish difference between data in rows
+    uniqueKey?: string;
 
     associations?: AssociationMap[];
 

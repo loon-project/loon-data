@@ -36,8 +36,9 @@ export class DataMapExecutor {
                 map.associations.map(map => {
 
                     const ins = this.exec(dataItem, map, false);
+                    const uniqueColumn = map.uniqueKey ? map.uniqueKey : 'id';
 
-                    if (ins && typeof ins.id !== 'undefined' && ins.id !== null) {
+                    if (ins && typeof ins[uniqueColumn] !== 'undefined' && ins[uniqueColumn] !== null) {
                         mainIns[map.property] = ins;
                     }
                 });
@@ -48,11 +49,13 @@ export class DataMapExecutor {
 
                      const ins = this.exec(dataItem, map, false);
 
-                     if (ins && typeof ins.id !== 'undefined' && ins.id !== null) {
+                     const uniqueColumn = map.uniqueKey ? map.uniqueKey : 'id';
+
+                     if (ins && typeof ins[uniqueColumn] !== 'undefined' && ins[uniqueColumn] !== null) {
 
                          if (mainIns[map.property]) {
 
-                             if (mainIns[map.property].map(_ => _.id).indexOf(ins.id) === -1) {
+                             if (mainIns[map.property].map(_ => _[uniqueColumn]).indexOf(ins[uniqueColumn]) === -1) {
                                  mainIns[map.property].push(ins);
                              }
 
@@ -94,7 +97,8 @@ export class DataMapExecutor {
     }
 
     private getCacheKey(map: DataMap, data: any) {
-        const idColumn = map.prefix ? `${map.prefix}id` : 'id';
+        const uniqueColumn = map.uniqueKey ? map.uniqueKey : 'id';
+        const idColumn = map.prefix ? `${map.prefix}${uniqueColumn}` : uniqueColumn;
         return `${idColumn}-${data[idColumn]}`;
     }
 }
