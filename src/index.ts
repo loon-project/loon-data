@@ -1,4 +1,4 @@
 
 export * from './DataMap';
-export * from './mapping/EntityMapping';
-export * from './mapping/ResultMapping';
+export * from './decorators/EntityMapping';
+export * from './decorators/ResultMapping';

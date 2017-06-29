@@ -1,6 +1,6 @@
 import "./TestHelper";
 import {expect} from "chai";
-import {ResultMapping} from "../src/mapping/ResultMapping";
+import {ResultMapping} from "../src/decorators/ResultMapping";
 import {AssociationMap, DataMap} from "../src/DataMap";
 import {Property} from "loon";
 

@@ -1,4 +1,4 @@
-import {ResultMapping} from "../src/mapping/ResultMapping";
+import {ResultMapping} from "../src/decorators/ResultMapping";
 import {expect} from "chai";
 import {Property} from "loon";
 
