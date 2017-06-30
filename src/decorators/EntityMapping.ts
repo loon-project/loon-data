@@ -7,7 +7,6 @@ export function EntityMapping() {
 
     return (target, key, descriptor) => {
 
-
         const method = descriptor.value;
 
         descriptor.value = (...args) => {

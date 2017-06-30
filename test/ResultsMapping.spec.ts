@@ -1,6 +1,6 @@
 import {Property} from "loon";
 import {expect} from "chai";
-import {ResultsMapping} from "../src/mapping/ResultMapping";
+import {ResultsMapping} from "../src/decorators/ResultMapping";
 
 describe("ResultsMapping", () => {
 
