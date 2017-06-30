@@ -20,4 +20,5 @@ export class ActiveRecord extends EventEmitter {
 
   public update() {
   }
+
 }
