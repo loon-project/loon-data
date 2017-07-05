@@ -1,14 +1,15 @@
 {
   "name": "loon-data",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Provide Mybatis ResultMap like function for NodeJS with Typescript",
   "main": "lib/index.js",
   "types": "dts/index.d.ts",
+  "repository": "https://github.com/loon-project/loon-data",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "prepublish": "npm run tsc:release",
+    "prepare": "npm run tsc:release",
     "test": "npm test",
     "tsc:release": "tsc --project tsconfig.compile.json",
     "db:init": "node ./test/db/init.js",
