@@ -2,8 +2,7 @@ import {EventEmitter} from "events";
 import {ActiveRecord} from "./ActiveRecord";
 import {SchemaRegistry} from "./SchemaRegistry";
 import {ConverterService} from "loon";
-
-const knex = require('knex')({});
+import {Adapter} from "./Adapter";
 
 export class Repository extends EventEmitter {
 
@@ -13,20 +12,23 @@ export class Repository extends EventEmitter {
 
   private _converter: ConverterService;
 
-  constructor(modelKlass: new (...args) => ActiveRecord ) {
+  private _knex;
+
+  constructor(modelKlass: new (...args) => ActiveRecord) {
 
     super();
 
     const tableName = SchemaRegistry.getTableName(this._modelKlass);
 
+    this._modelKlass = modelKlass;
+    this._knex = Adapter.getConnection();
+    this._converter = new ConverterService();
+
     if (tableName) {
-      this._knexQuery = knex.from(tableName);
+      this._knexQuery = this._knex.from(tableName);
     } else {
       throw new Error(`${this._modelKlass.name} haven't register with @Table`)
     }
-
-    this._modelKlass = modelKlass;
-    this._converter = new ConverterService();
   }
 
   public timeout(ms: number) {
@@ -96,6 +98,68 @@ export class Repository extends EventEmitter {
 
   public whereExists(option) {
     this._knexQuery = this._knexQuery.whereExists(option);
+    return this;
+  }
+
+  public orWhereNotExists(option) {
+    this._knexQuery = this._knexQuery.orWhereNotExists(option);
+    return this;
+  }
+
+  public whereBetween(column: string, range: string[]|number[]) {
+    this._knexQuery = this._knexQuery.whereBetween(column, range);
+    return this;
+  }
+
+  public orWhereBetween(column: string, range: string[]|number[]) {
+    this._knexQuery = this._knexQuery.orWhereBetween(column, range);
+    return this;
+  }
+
+  public whereNotBetween(column: string, range: string[]|number[]) {
+    this._knexQuery = this._knexQuery.whereNotBetween(column, range);
+    return this;
+  }
+
+  public orWhereNotBetween(column: string, range: string[]|number[]) {
+    this._knexQuery = this._knexQuery.orWhereNotBetween(column, range);
+    return this;
+  }
+
+  public whereRaw(query, binding?: any[]) {
+    this._knexQuery = this._knexQuery.whereRaw(query, binding);
+    return this;
+  }
+
+  public transacting(transactionObj: any) {
+    this._knexQuery = this._knexQuery.transacting(transactionObj);
+    return this;
+  }
+
+
+
+  public distinct(...args: string[]) {
+    this._knexQuery = this._knexQuery.distinct(...args);
+    return this;
+  }
+
+  public orderBy(...args: string[]) {
+    this._knexQuery = this._knexQuery.orderBy(...args);
+    return this;
+  }
+
+  public orderByRaw(sql: any) {
+    this._knexQuery = this._knexQuery.orderByRaw(sql);
+    return this;
+  }
+
+  public offset(value: number) {
+    this._knexQuery = this._knexQuery.offset(value);
+    return this;
+  }
+
+  public limit(value: number) {
+    this._knexQuery = this._knexQuery.limit(value);
     return this;
   }
 

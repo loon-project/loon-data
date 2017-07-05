@@ -1,4 +1,3 @@
-import {Klass} from "loon";
 import {TableMetadata} from "./TableMetadata";
 
 export class SchemaRegistry {

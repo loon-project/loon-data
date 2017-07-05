@@ -9,5 +9,4 @@ export class TableMetadata {
 
   public columnMappingsReverse: any;
 
-
 }
