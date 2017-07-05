@@ -1,136 +1,108 @@
 import {EventEmitter} from "events";
-import {Klass} from "loon";
 import {ActiveRecord} from "./ActiveRecord";
-import {WhereOptions} from "./WhereOptions";
-import * as _ from 'lodash';
-import * as fp from 'lodash/fp';
+import {SchemaRegistry} from "./SchemaRegistry";
+import {ConverterService} from "loon";
+
+const knex = require('knex')({});
 
 export class Repository extends EventEmitter {
 
-  private _where: WhereOptions;
-  private _fields: string[];
-  private _modelKlass: Klass;
+  private _modelKlass: Function;
 
-  // private _client = client;
-  private _and = this;
-  private _single = {};
-  private _statements: any[] = [];
-  private _method = 'select';
+  private _knexQuery;
 
-  private _lastStatement: any;
-
-  private _joinFlag = 'inner';
-  private _boolFlag = 'and';
-  private _notFlag = false;
-
+  private _converter: ConverterService;
 
   constructor(modelKlass: new (...args) => ActiveRecord ) {
 
     super();
+
+    const tableName = SchemaRegistry.getTableName(this._modelKlass);
+
+    if (tableName) {
+      this._knexQuery = knex.from(tableName);
+    } else {
+      throw new Error(`${this._modelKlass.name} haven't register with @Table`)
+    }
+
     this._modelKlass = modelKlass;
+    this._converter = new ConverterService();
   }
 
-  public toString() {
-    return this.toQuery();
-  }
-
-  public toQuery() {
-  }
-
-  public toSQL() {
-  }
-
-  public columns(...columns) {
-    if (columns.length === 0) return this;
-    this._statements.push({
-      grouping: 'columns',
-      value: columns
-    });
+  public timeout(ms: number) {
+    this._knexQuery = this._knexQuery.timeout(ms);
     return this;
   }
 
-  public distinct() {
-    this._statements.push({
-      grouping: 'columns',
-      value: null,
-      distinct: true
-    });
+  public select(...args: string[]) {
+    this._knexQuery = this._knexQuery.select(...args);
     return this;
   }
 
-  public where(query: string, ...bindings)
-
-  /*
-   * where chain support two ways
-   *   1. object way .where({username: "Jack"})
-   *   2. string way .where("username = ?", "Jack")
-   */
-  public where(options: WhereOptions) {
-
-    const raw = "";
-
-    this._statements.push({
-      grouping: 'where',
-      type: 'raw',
-      value: raw,
-      not: false,
-      bool: false
-    });
+  public as(name: string) {
+    this._knexQuery = this._knexQuery.as(name);
     return this;
   }
 
-  public whereNot() {
-
-  }
-
-  public whereOr() {
-
-  }
-
-  public fields(...fields: string[]) {
-    this._fields = fp.flow(
-      fp.concat(),
-      fp.flatten(),
-      fp.uniq(),
-      fp.compact()
-    )(this._fields)(fields);
-
+  public where(...args: any[]) {
+    this._knexQuery = this._knexQuery.where(...args);
     return this;
   }
 
-  public limit() {
+  public whereNot(...args: any[]) {
+    this._knexQuery = this._knexQuery.whereNot(...args);
     return this;
   }
 
-  public order() {
+  public whereIn(column: string, option: any) {
+    this._knexQuery = this._knexQuery.whereIn(column, option);
     return this;
   }
 
-  public count() {
+  public orWhereIn(column: string, option: any) {
+    this._knexQuery = this._knexQuery.orWhereIn(column, option);
     return this;
   }
 
-  public find() {
+  public whereNotIn(column: string, option: any) {
+    this._knexQuery = this._knexQuery.whereNotIn(column, option);
     return this;
   }
 
-  public findOne() {
+  public orWhereNotIn(column: string, option: any) {
+    this._knexQuery = this._knexQuery.orWhereNotIn(column, option);
     return this;
   }
 
-  public update(data: any) {
+  public whereNull(column: string) {
+    this._knexQuery = this._knexQuery.whereNull(column);
     return this;
   }
 
-  public delete() {
+  public OrWhereNull(column: string) {
+    this._knexQuery = this._knexQuery.OrWhereNull(column);
     return this;
   }
 
+  public whereNotNull(column: string) {
+    this._knexQuery = this._knexQuery.whereNotNull(column);
+    return this;
+  }
+
+  public OrWhereNotNull(column: string) {
+    this._knexQuery = this._knexQuery.OrWhereNotNull(column);
+    return this;
+  }
+
+  public whereExists(option) {
+    this._knexQuery = this._knexQuery.whereExists(option);
+    return this;
+  }
+
+  public async then() {
+    const result = await this._knexQuery;
+    return this._converter.convert(result, this._modelKlass);
+  }
 }
 
-class User extends ActiveRecord {
-
-}
-
-const repo = new Repository(User);
 

@@ -12,6 +12,14 @@ export class SchemaRegistry {
     tableMetadata.tableName = tableName;
   }
 
+  public static getTableName(type: Function) {
+    const tableMetadata = this._tables.get(type);
+
+    if (tableMetadata) {
+      return tableMetadata.tableName;
+    }
+  }
+
   public static registerColumn(type: Function, propertyName: string, columnName?: string) {
     columnName = columnName ? columnName : propertyName;
 
