@@ -6,3 +6,4 @@ export * from './decorators/Column';
 export * from './DataMap';
 export * from './Repository';
 export * from './ActiveRecord';
+export * from './Adapter';
